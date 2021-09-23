@@ -56,19 +56,9 @@ with open(file_path) as fp:
 # Check this looks like a spectra file
 #FORMAT      : EMSA/MAS Spectral Data File
 
-#Extract labels for use NOT DONE YET
+#Extract labels for use
 ##OXINSTLABEL: 26, 6.404, Fe
 # Second number is keV
-
-"""
-oxlabVal = []
-oxlabTxt = []
-
-oxlb = line.split(",")
-oxlabVal.append(float(oxlb[1]))
-oxlabTxt.append(oxlb[2])
-
-"""
 
 EDXVar = False
 HashStr = "#"
