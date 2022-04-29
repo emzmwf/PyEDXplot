@@ -67,6 +67,10 @@ xdata = []
 ydata = []
 oxlabVal = []
 oxlabTxt = []
+XPERStr = "XPERCHAN"
+XPERCHAN = []
+TitleStr = "TITLE"
+TitleTxt = []
 
 EDX_str = "EMSA/MAS"
 with open(file_path) as fp:
@@ -78,6 +82,12 @@ with open(file_path) as fp:
            oxlb = line.split(",")
            oxlabVal.append(float(oxlb[1]))
            oxlabTxt.append(oxlb[2])
+       if XPERStr in line:
+           xper = line.split(":")
+           XPERCHAN.append(float(xper[1]))
+       if TitleStr in line:
+           Ttline = line.split(":")
+           TitleTxt.append(str(Ttline[1]))
        if not HashStr in line:
            #print("will append this line")
            values = line.split(",")
@@ -91,7 +101,12 @@ if not EDXVar:
     print ("This does not appear to be an EDX format file")
     sys.exit
 
-print (EDXVar)    
+#print (EDXVar)
+#print(XPERCHAN[0])
+#print(TitleTxt)
+TT = TitleTxt[0]
+TT = TT.strip()
+#print(TT)
 
 #
 #
@@ -103,16 +118,22 @@ print (EDXVar)
 print("Plotting data")
 # Define plot size
 fig = plt.figure()
+fig.set_size_inches(5, 2.5)
 
 #plt = plt.gcf()
 #plt.plot(xdata, ydata, ".", label="Data")
 #plt.plot(xdata, ydata, color='red')
 #plt.plot(xdata, ydata)
+
+#line plot
 plt.plot(xdata, ydata, label="Data")
+
+#filled under
+plt.fill_between(xdata, ydata, 0)
+
 axis = plt.gca()
-#plt.set_size_inches(5,3)
 axis.set_ylabel('counts')
-axis.set_xlim(0,10)
+axis.set_xlim(0,20) #range to plot in keV
 #axis.set_ylim(0,2000)
 
 ###Annotations###
@@ -132,12 +153,21 @@ axis.text(xlab, ylab+offset, 'Cu')
 lv = 0
 while lv < len(oxlabVal):
     xlab = round(oxlabVal[lv],2)
-    ylab = ydata[xdata.index(xlab)]
-    axis.text(xlab, ylab+offset, oxlabTxt[lv])
+        
+#could round xlab to the nearest XPERCHAN, but just find the min instead
+#NOT the quickest way to do this in program terms, but quick to write    
+    xlabR = min(xdata, key=lambda x:abs(x-xlab))
+    ylab = ydata[xdata.index(xlabR)]
+
+#set minimum value or don't plot
+    labmin = 1000
+    if (ylab>=labmin):
+        axis.text(xlab, ylab+offset, oxlabTxt[lv])
     lv = lv +1
 
 
-plt.title('Plot Demo - EDX data parsed from msa file')
+#plt.title('Plot Demo - EDX data parsed from msa file')
+plt.title(TT)
 
 # Show the graph
 plt.legend()
