@@ -111,8 +111,8 @@ TT = TT.strip()
 #
 #
 ###############################################
-
-
+## Edit the plot size in inches here
+#############################################
 
 
 print("Plotting data")
@@ -133,7 +133,15 @@ plt.fill_between(xdata, ydata, 0)
 
 axis = plt.gca()
 axis.set_ylabel('counts')
+
+######################################
+## Edit the keV range displayed here
+######################################
 axis.set_xlim(0,20) #range to plot in keV
+
+##
+## Uncomment and set this to manually set count range
+##
 #axis.set_ylim(0,2000)
 
 ###Annotations###
@@ -159,7 +167,9 @@ while lv < len(oxlabVal):
     xlabR = min(xdata, key=lambda x:abs(x-xlab))
     ylab = ydata[xdata.index(xlabR)]
 
-#set minimum value or don't plot
+#########################################      
+## Adjust trace element labelling here      
+##set minimum value or don't plot
     labmin = 1000
     if (ylab>=labmin):
         axis.text(xlab, ylab+offset, oxlabTxt[lv])
