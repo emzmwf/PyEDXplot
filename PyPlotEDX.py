@@ -169,7 +169,8 @@ while lv < len(oxlabVal):
 
 #########################################      
 ## Adjust trace element labelling here      
-##set minimum value or don't plot
+##set minimum intensity at the corresponding kV or don't label
+## Note, does not handle overlapping peaks
     labmin = 1000
     if (ylab>=labmin):
         axis.text(xlab, ylab+offset, oxlabTxt[lv])
