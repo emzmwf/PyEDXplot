@@ -3,8 +3,46 @@ import matplotlib.pyplot as plt;
 import tkinter as tk
 from tkinter import filedialog
 
+### Version updated October 2025
+
 ###########################################
-#import data
+#User Set Variables
+###########################################
+
+xplotmax = 10 #end of plot range in keV
+yplotmax = 3000 # maximum height of intensity plotted
+LabelOverlapRange = 0.22# in keV, width at which to check if there's more counts from another peak
+labmin = 250# minimum intensity to label a peak
+
+
+##############################################
+#Select a style for the plot
+#if you have a defined local style
+#
+#Example style file used:
+#font.family  : sans-serif
+#axes.titlesize : 18
+#axes.labelsize : 15
+#lines.linewidth : 3
+#lines.markersize : 10
+#xtick.labelsize : 12
+#ytick.labelsize : 12
+#xtick.major.size:    3.5     # major tick size in points
+#xtick.major.width:   0.8     # major tick width in points
+#ytick.major.size:    3.5     # major tick size in points
+#ytick.major.width:   0.8     # major tick width in points
+#figure.dpi:         100       # figure dots per inch
+#figure.facecolor: white
+#figure.edgecolor: white
+#figure.facecolor:   FDFBF9     # figure face color, off white
+#figure.edgecolor:   F3F4F5     # figure edge color, 
+#axes.prop_cycle: cycler('color', ['2ca02c','9467bd','1f77b4', 'ff7f0e',  'd62728',  '8c564b', 'e377c2', '7f7f7f', 'bcbd22', '17becf'])	#Green, purple as first choices - aid Deuteranopia?
+###############################################
+stylefile = 'Style1.mplstyle'
+#plt.style.use(stylefile)
+
+###########################################
+# #import data
 # use tkinter to open a file
 
 root = tk.Tk()
@@ -101,29 +139,21 @@ if not EDXVar:
     print ("This does not appear to be an EDX format file")
     sys.exit
 
-#print (EDXVar)
-#print(XPERCHAN[0])
-#print(TitleTxt)
 TT = TitleTxt[0]
 TT = TT.strip()
-#print(TT)
 
-#
+
+
+
+###############################################
+# Plot
 #
 ###############################################
-## Edit the plot size in inches here
-#############################################
-
 
 print("Plotting data")
 # Define plot size
 fig = plt.figure()
-fig.set_size_inches(5, 2.5)
-
-#plt = plt.gcf()
-#plt.plot(xdata, ydata, ".", label="Data")
-#plt.plot(xdata, ydata, color='red')
-#plt.plot(xdata, ydata)
+fig.set_size_inches(10, 5)
 
 #line plot
 plt.plot(xdata, ydata, label="Data")
@@ -132,17 +162,13 @@ plt.plot(xdata, ydata, label="Data")
 plt.fill_between(xdata, ydata, 0)
 
 axis = plt.gca()
+axis.set_xlabel('keV')
 axis.set_ylabel('counts')
+axis.set_xlim(0,xplotmax) #range to plot in keV
+axis.set_ylim(0,yplotmax)
 
-######################################
-## Edit the keV range displayed here
-######################################
-axis.set_xlim(0,20) #range to plot in keV
-
-##
-## Uncomment and set this to manually set count range
-##
-#axis.set_ylim(0,2000)
+#Hide the legend
+#axis.get_legend().remove()
 
 ###Annotations###
 
@@ -156,23 +182,30 @@ xlab = 8.04
 ylab = ydata[xdata.index(xlab)]
 axis.text(xlab, ylab+offset, 'Cu')
 """
+# keV per channel is in variable XPERCHAN[0]
+# to get number of indexes to move forward or back in array
+xrange = int(LabelOverlapRange/XPERCHAN[0])
 
 # len(oxlabVal)
 lv = 0
 while lv < len(oxlabVal):
     xlab = round(oxlabVal[lv],2)
+    labelyes = 1
         
 #could round xlab to the nearest XPERCHAN, but just find the min instead
 #NOT the quickest way to do this in program terms, but quick to write    
     xlabR = min(xdata, key=lambda x:abs(x-xlab))
     ylab = ydata[xdata.index(xlabR)]
-
-#########################################      
-## Adjust trace element labelling here      
-##set minimum intensity at the corresponding kV or don't label
-## Note, does not handle overlapping peaks
-    labmin = 1000
-    if (ylab>=labmin):
+# Selecting which to plot
+# checking local range and seeing which of overlapping points would be highest
+# e.g. to avoid multiple labels caused by k-edges
+    ylabLocalMax = max(ydata[xdata.index(xlab)-xrange:xdata.index(xlab)+xrange])
+    if ylab < ylabLocalMax*0.95:
+                       labelyes = 0
+#set minimum value or don't plot
+    if (ylab<labmin):
+        labelyes = 0
+    if (labelyes == 1):
         axis.text(xlab, ylab+offset, oxlabTxt[lv])
     lv = lv +1
 
@@ -181,5 +214,5 @@ while lv < len(oxlabVal):
 plt.title(TT)
 
 # Show the graph
-plt.legend()
 plt.show()
+
