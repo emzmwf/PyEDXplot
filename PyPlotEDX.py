@@ -22,15 +22,12 @@ def get_text_positions(x_data, y_data, txt_width, txt_height):
     a = zip(y_data, x_data)
     text_positions = y_data.copy()
     orig_text_positions = y_data.copy()
-    print(text_positions)
     txt_height = txt_height
 
     for index, (y, x) in enumerate(a):
         local_text_positions = [i for i in a]
         sorted_ltp = sorted(local_text_positions)
         differ = np.diff(sorted_ltp, axis=0)
-        print(sorted_ltp)
-        print(differ)
         #Now check differ for overlaps
         for k, (j, m) in enumerate(differ):
             if (abs(m)<txt_width) and (j < txt_height):
@@ -47,10 +44,7 @@ def get_text_positions(x_data, y_data, txt_width, txt_height):
                 if m<0:
                     kindex = k
                 errorval = sorted_ltp[kindex]
-                print('label to change is ')
-                print(errorval)
                 #find errorval[0] in text_positions
-                print(text_positions)
                 cval = orig_text_positions.index(errorval[0])
                 text_positions[cval] = errorval[0]+txt_height*1.5
                 
