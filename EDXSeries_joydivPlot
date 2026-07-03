@@ -1,0 +1,187 @@
+# Series of EDX spectra as plot in the style of the album art of Joy Divisions' "Unknown Pleasures"
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Source dataset - file, or series
+#source = 'file'
+source = 'series'
+
+#and give the source accordingly, e.g. 
+#src = r'EDX_series.csv'
+src = r"//nmrc-nas.nottingham.ac.uk/data/Instrument Data/2100Plus/linescan spectra example"
+
+#Plot in reverse order, i.e. first spectra was acquired at top and working down
+reverse = True
+
+#plot min and max in keV
+plotmin = 1.5
+plotmax = 2.5
+
+#Data put into csv file?
+if source == 'file':
+    df = pd.read_csv(src, header=None)
+
+def SpectraFromFile(file_path):
+    f = open(file_path, 'r')
+    text = f.read()
+    line = f.readline()
+    EDXVar = False
+    HashStr = "#"
+    OXStr = "OXINSTLABEL"
+    xdata = []
+    ydata = []
+    oxlabVal = []
+    oxlabTxt = []
+    XPERStr = "XPERCHAN"
+    XPERCHAN = []
+    CHOFFstr = 'CHOFFSET'
+    CHOFF = []
+    TitleStr = "TITLE"
+    TitleTxt = []
+
+    EDX_str = "EMSA/MAS"
+    with open(file_path) as fp:
+       for cnt, line in enumerate(fp):
+           #print("Line {}: {}".format(cnt, line))
+           if EDX_str in line:
+               EDXVar = True
+           if OXStr in line:
+               oxlb = line.split(",")
+               oxlabVal.append(float(oxlb[1]))
+               oxlabTxt.append(oxlb[2])
+           if XPERStr in line:
+               xper = line.split(":")
+               XPERCHAN.append(float(xper[1]))
+           if TitleStr in line:
+               Ttline = line.split(":")
+               TitleTxt.append(str(Ttline[1]))
+           if CHOFFstr in line:
+               choffs = line.split(":")
+               CHOFF.append(float(choffs[1]))
+           if not HashStr in line:
+               #print("will append this line")
+               values = line.split(",")
+               xv = values[0]
+               xdata.append(float(xv))
+               yv = values[1]
+               ydata.append(float(yv))
+
+    #End if this isn't an EDX file
+    if not EDXVar:
+        print ("This does not appear to be an EDX format file")
+        sys.exit
+
+    TT = TitleTxt[0]
+    TT = TT.strip()
+    #may also want to return xperchan and offset
+    return ydata, XPERCHAN, CHOFF
+
+XPERCHAN = [0.01]
+CHOFF = [20.0]
+
+if source == 'series':
+    import os
+    spectra_list = []
+    # process file and put spectra data into dataframe
+    for e in os.scandir(src):
+        if e.is_file():
+            filename, file_extension = os.path.splitext(e.path)
+            if file_extension in ('.txt', '.msa'):
+                ydata, XPERCHAN, CHOFF = SpectraFromFile(e.path)
+                spectra_list.append(ydata)
+
+df = pd.DataFrame(list(zip(spectra_list)), columns=['Counts'])
+
+#setting the size of the frame
+vertical_margin = 20
+horizontal_margin = 20
+x_size = 30
+y_size = 30
+
+#line width
+linewidth = 4
+
+#plot name
+joydiv='EDS_joydiv_plot.png'
+
+#use grayscale theme
+plt.style.use('grayscale')
+
+#add subplot with no frame
+fig, ax = plt.subplots(figsize=(x_size,y_size),frameon=False)
+
+n_lines = df.shape[0]
+print("n_lines is "+str(n_lines))
+x = range(2048)
+print(x)
+print("x is "+str(x))
+
+#convert keV to xvalues for a 2048 value plot
+xmin = int((plotmin/XPERCHAN[0])+CHOFF[0])
+if (xmin<0):
+    xmin = 0
+print("xmin is "+str(xmin))
+xmax = int((plotmax/XPERCHAN[0])+CHOFF[0])
+
+def text_plotter(x_data, labels, ypos):
+    for x,lab in zip(x_data, labels):
+        ax.text(x, -0.1+ypos, str(lab), rotation=0, color='blue', fontsize = 48)
+
+#add element labels - labels at start of range
+keV_l = [0.277,0.525,1.012, 2.05, 3.69, 8.048, 9.442]
+x_data_l = [int(((e/XPERCHAN[0]))+CHOFF[0]) for e in keV_l]
+labels_l = ['C', 'O', 'Zn', 'Pt', 'Ca','Cu', 'Pt']
+
+#add element labels - labels at end of range
+keV_t = [0.277,0.525,1.012,2.013, 3.69, 6.40, 8.048]
+x_data_t = [int(((e/XPERCHAN[0]))+CHOFF[0]) for e in keV_t]
+labels_t = ['C', 'O', 'Zn','P', 'Ca', 'Fe', 'Cu']
+
+
+if reverse==False:
+    #plotting the lines
+    for row in df.iterrows():
+        rv = row[1].values
+        rv2 = rv[0]
+        #print(rv2)
+        #line = rv2/3 + (n_lines - row[0])
+        #print(row[0])
+        nprv = np.array(rv2)
+        #line = nprv/3
+        #line = float(nprv)/3+(n_lines-row[0])
+        line = (nprv)/3+(n_lines-row[0])
+        ax.plot(x[xmin:xmax], line[xmin:xmax], lw=linewidth, c='black', alpha=1, zorder=row[0]/n_lines)
+        ax.fill_between(x[xmin:xmax], -5,line[xmin:xmax],  facecolor='white', zorder=row[0]/n_lines)
+    text_plotter(x_data_l, labels_l, -1)
+    text_plotter(x_data_t, labels_t, n_lines+5)
+
+if reverse==True:
+    #plotting the lines in reverse order
+    for row in df.iterrows():
+        rv = row[1].values
+        rv2 = rv[0]
+        #print(rv2)
+        #line = rv2/3 + (n_lines - row[0])
+        #print(row[0])
+        nprv = np.array(rv2)
+        #line = nprv/3
+        #line = float(nprv)/3+(n_lines-row[0])
+        line = (nprv)/3+(row[0])
+        ax.plot(x[xmin:xmax], line[xmin:xmax], lw=linewidth, c='black', alpha=1, zorder=(n_lines-row[0])/n_lines)
+        ax.fill_between(x[xmin:xmax], -5,line[xmin:xmax],  facecolor='white', zorder=(n_lines-row[0])/n_lines)
+    text_plotter(x_data_l, labels_l, n_lines+5)
+    text_plotter(x_data_t, labels_t, -1)
+
+
+#no ticks
+ax.set_yticks([])
+ax.set_xticks([])
+
+#set x and y limits
+ax.set_xlim(min(x[xmin:xmax])-horizontal_margin, max(x[xmin:xmax])+horizontal_margin)
+ax.set_ylim(-vertical_margin, df.shape[0] + vertical_margin)
+
+#save plot in same folder that script is run from
+plt.savefig(joydiv)
