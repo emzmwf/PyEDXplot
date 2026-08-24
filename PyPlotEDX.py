@@ -15,8 +15,7 @@ yplotmax = 3000 # maximum height of intensity plotted
 LabelOverlapRange = 0.01# in keV, width at which to check if there's more counts from another peak
 labmin = 25# minimum intensity to label a peak
 
-
-
+# For getting the positions of the labels to plot
 def get_text_positions(x_data, y_data, txt_width, txt_height):
     # Need to sort the data, and identify any with close x gap where there isn't a y gap
     a = zip(y_data, x_data)
@@ -32,7 +31,7 @@ def get_text_positions(x_data, y_data, txt_width, txt_height):
         for k, (j, m) in enumerate(differ):
             if (abs(m)<txt_width) and (j < txt_height):
                 print('side collision at'+str(index)+'k no'+str(k))
-                #Well, now we've found it, what do we do with it?
+                #Well, now we've found a text overlap, what do we do with it?
                 #get the value from sorted_ltp, and find that same value
                 #in text_positions
                 #Then change that value by value+txt_height
@@ -51,7 +50,7 @@ def get_text_positions(x_data, y_data, txt_width, txt_height):
     print(text_positions)
     return text_positions
 
-
+# For plotting the labels
 def text_plotter(x_data, y_data, labels, text_positions, axis,txt_width,txt_height):
     for x,y,lab, t in zip(x_data, y_data, labels, text_positions):
         #axis.text(x - .03, 1.02*t, '%d'%int(y),rotation=0, color='blue', fontsize=13)
@@ -61,11 +60,8 @@ def text_plotter(x_data, y_data, labels, text_positions, axis,txt_width,txt_heig
                        head_width=.02, head_length=txt_height*0.5,
                        zorder=0,length_includes_head=True)
 
-
+# Main part of script - get an EMSA file by dialog and plot the graph
 def Main(xplotmax, yplotmax, LabelOverlapRange, labmin):
-
-
-
     ##############################################
     #Select a style for the plot
     #if you have a defined local style
@@ -280,6 +276,6 @@ def Main(xplotmax, yplotmax, LabelOverlapRange, labmin):
 
     # Show the graph
     plt.show()
-    
 
+# Run the script
 Main(xplotmax, yplotmax, LabelOverlapRange, labmin)
