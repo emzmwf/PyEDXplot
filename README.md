@@ -10,7 +10,7 @@ Takes either spectra data from csv file or a series of spectra in a folder
 Extracts data as with PyEDXplot script
 Produces a plot of the spectra in a ridgeline plot
 
-#PyPlot_Checklist_EDX
+# PyPlot_Checklist_EDX
 Replots EMSA format EDS file
 Parses identified elements in the EMSA file
 Displays checklist to select which peaks are to be labelled
