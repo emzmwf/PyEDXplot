@@ -5,10 +5,10 @@ Loads files in the format of EMSA/MAS Spectral Data File only
 tkinter used to select file to plot
 Parameters such as plot size, keV range, y limits, etc adjustable in the code itself
 
-# EDXSeries_RidgelinePlot
+# EDXSeries_Ridgeline
 Takes either spectra data from csv file or a series of spectra in a folder
 Extracts data as with PyEDXplot script
-Produces a plot of the spectra in a ridgeline plot
+Produces a plot of the spectra in a stacked series ridgeline plot
 
 # PyPlot_Checklist_EDX
 Replots EMSA format EDS file
